@@ -1,43 +1,118 @@
-# Authentication Microservices
+# Scalable Authentication Microservices
 
-This project consists of two Go microservices that provide user authentication functionality:
+This project consists of a highly scalable Go microservice architecture that provides comprehensive user authentication and profile management functionality:
 
-1. **Auth Frontend Service** - A web interface for login, signup, and password management
-2. **Auth Backend Service** - A REST API that handles authentication logic
+1. **Auth Frontend Service** - Modern web interface for authentication and profile management
+2. **Auth Backend Service** - High-performance REST API with PostgreSQL and Redis
+3. **Load Balancer** - Nginx for traffic distribution and SSL termination
+4. **Database Layer** - PostgreSQL with connection pooling for data persistence
+5. **Cache Layer** - Redis for session management and rate limiting
+6. **Monitoring** - Prometheus and Grafana for observability
 
 ## Features
 
-- **User Login** - Secure user authentication with JWT tokens
-- **User Signup** - New user registration with email validation
-- **Password Change** - Secure password update functionality
-- **Modern UI** - Responsive web interface with modern design
-- **Microservice Architecture** - Separate frontend and backend services
-- **JWT Authentication** - Secure token-based authentication
-- **Password Hashing** - Bcrypt encryption for password security
-- **Docker Support** - Containerized deployment with Docker Compose
+### 🔐 Authentication & Security
+- **User Login** - Secure authentication with JWT tokens and account locking
+- **User Signup** - Registration with comprehensive validation
+- **Password Management** - Secure password change with history
+- **Rate Limiting** - Redis-based distributed rate limiting
+- **Account Locking** - Protection against brute force attacks
+- **JWT Token Management** - Secure tokens with blacklisting support
+
+### 👤 User Profile Management
+- **Comprehensive Profiles** - Personal, professional, and contact information
+- **Profile Pictures** - Image upload and management
+- **Social Links** - LinkedIn, Twitter, GitHub integration
+- **Address Information** - Complete address management
+- **Preferences & Settings** - Customizable user preferences stored as JSONB
+
+### 🚀 Scalability & Performance
+- **PostgreSQL Database** - Robust data persistence with connection pooling
+- **Redis Caching** - High-performance session and cache management
+- **Load Balancing** - Nginx with upstream server configuration
+- **Horizontal Scaling** - Ready for multiple service instances
+- **Health Checks** - Comprehensive service monitoring
+- **Connection Pooling** - Optimized database connections (100 max, 10 idle)
+
+### 🛡️ Security Features
+- **Password Hashing** - Bcrypt encryption with salt
+- **Account Locking** - Automatic lockout after failed attempts
+- **Rate Limiting** - Multiple tiers (general, API, login)
+- **CORS Protection** - Configurable cross-origin policies
+- **Security Headers** - XSS, CSRF, and clickjacking protection
+
+### 📊 Monitoring & Observability
+- **Health Endpoints** - Database and Redis health checks
+- **Prometheus Metrics** - Performance and usage monitoring
+- **Grafana Dashboards** - Visual monitoring and alerting
+- **Structured Logging** - Comprehensive request/error logging
+
+### 🎨 Modern UI/UX
+- **Responsive Design** - Mobile-first responsive interface
+- **Modern Styling** - Gradient designs with smooth animations
+- **Form Validation** - Real-time client and server-side validation
+- **Loading States** - User-friendly loading indicators
+- **Error Handling** - Graceful error display and recovery
 
 ## Architecture
 
 ```
-┌─────────────────┐    HTTP/JSON    ┌─────────────────┐
-│                 │    Requests     │                 │
-│  Auth Frontend  │ ──────────────► │  Auth Backend   │
-│   (Port 8080)   │                 │   (Port 8081)   │
-│                 │                 │                 │
-└─────────────────┘                 └─────────────────┘
+                    ┌─────────────────┐
+                    │     Nginx       │
+                    │ Load Balancer   │
+                    │   (Port 80)     │
+                    └─────────┬───────┘
+                              │
+                ┌─────────────┼─────────────┐
+                │             │             │
+        ┌───────▼──────┐     │     ┌───────▼──────┐
+        │ Auth Frontend│     │     │ Auth Backend │
+        │  (Port 8080) │     │     │ (Port 8081)  │
+        │              │     │     │              │
+        └──────────────┘     │     └──────┬───────┘
+                             │            │
+                             │            │ Database
+                             │            │ Queries
+                             │            │
+                    ┌────────▼──────┐     │
+                    │    Redis      │     │
+                    │   (Cache &    │     │
+                    │ Rate Limiting)│     │
+                    │  (Port 6379)  │     │
+                    └───────────────┘     │
+                                          │
+                                 ┌────────▼──────┐
+                                 │  PostgreSQL   │
+                                 │   Database    │
+                                 │  (Port 5432)  │
+                                 └───────────────┘
 ```
 
 ## API Endpoints
 
 ### Auth Backend Service (Port 8081)
 
-- `POST /login` - User authentication
-- `POST /signup` - User registration
-- `POST /change-password` - Password change
-- `GET /health` - Health check
+#### Authentication Endpoints
+- `POST /api/v1/auth/signup` - User registration
+- `POST /api/v1/auth/login` - User authentication
+- `POST /api/v1/auth/refresh` - Refresh JWT token
+- `POST /api/v1/change-password` - Password change (public)
+
+#### Protected User Endpoints (Require Authentication)
+- `GET /api/v1/profile` - Get user profile with all details
+- `PUT /api/v1/profile` - Update user profile information
+- `GET /api/v1/user/me` - Get current user basic information
+- `POST /api/v1/user/logout` - User logout (blacklist token)
+
+#### Admin Endpoints (Require Authentication)
+- `GET /api/v1/admin/users` - List users with pagination
+
+#### System Endpoints
+- `GET /health` - Comprehensive health check (DB + Redis)
 
 ### Auth Frontend Service (Port 8080)
 
+#### Authentication Pages
 - `GET /` - Login page (redirects to /login)
 - `GET /login` - Login page
 - `POST /login` - Handle login form
@@ -45,8 +120,17 @@ This project consists of two Go microservices that provide user authentication f
 - `POST /signup` - Handle signup form
 - `GET /change-password` - Change password page
 - `POST /change-password` - Handle password change
+
+#### User Dashboard & Profile
 - `GET /dashboard` - User dashboard (requires authentication)
+- `GET /profile` - User profile management page
+- `POST /profile` - Handle profile updates
 - `POST /logout` - User logout
+
+#### Static Assets
+- `/static/css/*` - Stylesheets
+- `/static/js/*` - JavaScript files
+- `/static/images/*` - Images and assets
 
 ## Quick Start
 
@@ -58,14 +142,24 @@ This project consists of two Go microservices that provide user authentication f
    cd auth-microservices
    ```
 
-2. Start the services:
+2. Start all services (PostgreSQL, Redis, Backend, Frontend, Nginx):
    ```bash
    docker-compose up --build
    ```
 
 3. Access the application:
-   - Frontend: http://localhost:8080
-   - Backend: http://localhost:8081
+   - **Main Application**: http://localhost (via Nginx load balancer)
+   - **Direct Frontend**: http://localhost:8080
+   - **Direct Backend API**: http://localhost:8081
+   - **PostgreSQL**: localhost:5432 (auth_user/auth_password)
+   - **Redis**: localhost:6379
+   - **Prometheus**: http://localhost:9090
+   - **Grafana**: http://localhost:3000 (admin/admin)
+
+4. **Optional**: Start only core services (without monitoring):
+   ```bash
+   docker-compose up postgres redis auth-service auth-frontend nginx
+   ```
 
 ### Manual Setup
 

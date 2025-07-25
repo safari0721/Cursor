@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.Title}} - Auth Service</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/profile.css">
+</head>
+<body>
+    <div class="profile-container">
+        <div class="profile-header">
+            <h1>User Profile</h1>
+            <p>Manage your personal information and preferences</p>
+        </div>
+
+        {{if .Error}}
+        <div class="alert alert-error">
+            {{.Error}}
+        </div>
+        {{end}}
+
+        {{if .Success}}
+        <div class="alert alert-success">
+            {{.Success}}
+        </div>
+        {{end}}
+
+        <div class="profile-content">
+            <!-- Profile Picture Section -->
+            <div class="profile-picture-section">
+                <div class="profile-picture">
+                    <img id="profileImage" src="{{if .User.ProfilePictureURL}}{{.User.ProfilePictureURL}}{{else}}/static/images/default-avatar.png{{end}}" alt="Profile Picture">
+                    <div class="profile-picture-overlay">
+                        <input type="file" id="profilePictureInput" accept="image/*" style="display: none;">
+                        <button type="button" onclick="document.getElementById('profilePictureInput').click()">
+                            Change Photo
+                        </button>
+                    </div>
+                </div>
+                <div class="user-basic-info">
+                    <h2>{{if .User.FirstName}}{{.User.FirstName}} {{.User.LastName}}{{else}}{{.User.Username}}{{end}}</h2>
+                    <p>{{.User.Email}}</p>
+                    <span class="user-status {{if .User.IsActive}}active{{else}}inactive{{end}}">
+                        {{if .User.IsActive}}Active{{else}}Inactive{{end}}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Profile Form -->
+            <form id="profileForm" class="profile-form">
+                <div class="form-sections">
+                    <!-- Personal Information -->
+                    <div class="form-section">
+                        <h3>Personal Information</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="firstName">First Name</label>
+                                <input type="text" id="firstName" name="first_name" value="{{.User.FirstName}}">
+                            </div>
+                            <div class="form-group">
+                                <label for="lastName">Last Name</label>
+                                <input type="text" id="lastName" name="last_name" value="{{.User.LastName}}">
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="phone">Phone Number</label>
+                                <input type="tel" id="phone" name="phone" value="{{.User.Phone}}">
+                            </div>
+                            <div class="form-group">
+                                <label for="dateOfBirth">Date of Birth</label>
+                                <input type="date" id="dateOfBirth" name="date_of_birth" value="{{.User.DateOfBirth}}">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="gender">Gender</label>
+                                <select id="gender" name="gender">
+                                    <option value="">Select Gender</option>
+                                    <option value="male" {{if eq .User.Gender "male"}}selected{{end}}>Male</option>
+                                    <option value="female" {{if eq .User.Gender "female"}}selected{{end}}>Female</option>
+                                    <option value="other" {{if eq .User.Gender "other"}}selected{{end}}>Other</option>
+                                    <option value="prefer-not-to-say" {{if eq .User.Gender "prefer-not-to-say"}}selected{{end}}>Prefer not to say</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="website">Website</label>
+                                <input type="url" id="website" name="website" value="{{.User.Website}}" placeholder="https://example.com">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="bio">Bio</label>
+                            <textarea id="bio" name="bio" rows="3" placeholder="Tell us about yourself...">{{.User.Bio}}</textarea>
+                        </div>
+                    </div>
+
+                    <!-- Address Information -->
+                    <div class="form-section">
+                        <h3>Address Information</h3>
+                        <div class="form-group">
+                            <label for="address">Street Address</label>
+                            <input type="text" id="address" name="address" value="{{.User.Address}}">
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="city">City</label>
+                                <input type="text" id="city" name="city" value="{{.User.City}}">
+                            </div>
+                            <div class="form-group">
+                                <label for="state">State/Province</label>
+                                <input type="text" id="state" name="state" value="{{.User.State}}">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="country">Country</label>
+                                <input type="text" id="country" name="country" value="{{.User.Country}}">
+                            </div>
+                            <div class="form-group">
+                                <label for="postalCode">Postal Code</label>
+                                <input type="text" id="postalCode" name="postal_code" value="{{.User.PostalCode}}">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Professional Information -->
+                    <div class="form-section">
+                        <h3>Professional Information</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="occupation">Occupation</label>
+                                <input type="text" id="occupation" name="occupation" value="{{.User.Occupation}}">
+                            </div>
+                            <div class="form-group">
+                                <label for="company">Company</label>
+                                <input type="text" id="company" name="company" value="{{.User.Company}}">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="department">Department</label>
+                                <input type="text" id="department" name="department" value="{{.User.Department}}">
+                            </div>
+                            <div class="form-group">
+                                <label for="jobTitle">Job Title</label>
+                                <input type="text" id="jobTitle" name="job_title" value="{{.User.JobTitle}}">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Social Links -->
+                    <div class="form-section">
+                        <h3>Social Links</h3>
+                        <div class="form-group">
+                            <label for="linkedinUrl">LinkedIn URL</label>
+                            <input type="url" id="linkedinUrl" name="linkedin_url" value="{{.User.LinkedinURL}}" placeholder="https://linkedin.com/in/username">
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="twitterUrl">Twitter URL</label>
+                                <input type="url" id="twitterUrl" name="twitter_url" value="{{.User.TwitterURL}}" placeholder="https://twitter.com/username">
+                            </div>
+                            <div class="form-group">
+                                <label for="githubUrl">GitHub URL</label>
+                                <input type="url" id="githubUrl" name="github_url" value="{{.User.GithubURL}}" placeholder="https://github.com/username">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="window.location.href='/dashboard'">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="/static/js/profile.js"></script>
+</body>
+</html>
