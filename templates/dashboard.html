@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.Title}} - Auth Service</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="dashboard">
+            <h1>Welcome to Your Dashboard</h1>
+            <p>You are successfully logged in!</p>
+
+            <div class="dashboard-actions">
+                <a href="/change-password" class="btn-primary">Change Password</a>
+                
+                <form method="POST" action="/logout" style="margin: 0;">
+                    <button type="submit" class="btn-danger" style="width: 100%;">Logout</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
